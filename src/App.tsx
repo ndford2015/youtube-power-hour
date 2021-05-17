@@ -90,7 +90,8 @@ function App() {
           onEnd={onPlayerStateChange}
           onError={onPlayerStateChange}
           containerClassName="youtube-container"
-          opts={{playerVars: {controls: 0}, width: '90%', height: '90%'}}
+          className={showDrinkText ? 'hidden' : ''}
+          opts={{playerVars: {controls: 0, showinfo: 0, rel: 0, modestbranding: 1}, width: '100%', height: '100%'}}
         />
   }
 
@@ -107,13 +108,13 @@ function App() {
         content={`Video ${videoIndex} / 60`} 
       />}
       <Checkbox 
-        label="Hide Header" 
-        toggle checked={hideHeader} 
+        label="Show Header" 
+        toggle checked={!hideHeader} 
         onClick={toggleHeader}
         className="hide-header-toggle"
       />
-      <div className="heading">
-        <Header size="medium" className={`title${hidden}`} textAlign="left">
+      <div className={`heading${hidden}`}>
+        <Header size="medium" className="title" textAlign="left">
           <div>
             <span>YouTube</span>
             <span>Power</span>
@@ -125,7 +126,6 @@ function App() {
       >
         <div className="form-header">
           <Label 
-            className={hidden}
             icon="arrow alternate circle down" 
             size="big" 
             content="Enter YouTube playlist URL" 
@@ -134,7 +134,6 @@ function App() {
         <Popup
           trigger={
             <Input type="text"
-              className={hidden}
               value={url}
               onChange={e => setUrl(e.target.value)} 
               action={{
