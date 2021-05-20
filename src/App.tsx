@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import YouTube from 'react-youtube';
 import './App.css';
-import { getPlaylistVideoIds, getVideos, VideoItem, videoItemToPlayerItem, VideoPlayerItem } from './utils';
+import { getPlaylistVideoIds, getVideos, PlaylistItemResponse, PlaylistSearchItem, PlaylistSearchItems, searchPlaylists, VideoItem, videoItemToPlayerItem, VideoPlayerItem } from './utils';
 import { Button, Checkbox, Header, Icon, Input, Label, Loader, Message, Popup } from 'semantic-ui-react';
 import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
 import { ERROR_TEXT } from './constants';
 
 function App() {
-  const [url, setUrl] = useState('');
+  const MAX_RESULTS: number = 5;
+  const [query, setQuery] = useState('');
+  const [validPlaylists, setValidPlaylists] = useState<PlaylistSearchItem[]>([]);
   const [videoPlayerItems, setVideoPlayerItems] = useState<VideoPlayerItem[]>([]);
   const [videoIndex, setVideoIndex] = useState<number>(0);
   const [showDrinkText, setShowDrinkText] = useState<boolean>(false);
@@ -17,13 +19,30 @@ function App() {
   const hidden: string = hideHeader ? ' hidden' : ''
   
 
-  const validateAndSetPlaylist = async (evt:any) => {
+  const searchValidPlaylists = async (evt:any) => {
     evt.preventDefault();
     setError('');
     setVideoIndex(0);
     setVideoPlayerItems([]);
-    const playlistId: string = getPlaylistIdFromUrl(url);
-    if (!playlistId) {
+    setIsLoading(true);
+    const playlists: PlaylistSearchItems = await searchPlaylists(query);
+    const validPlaylists: PlaylistSearchItem[] = [];
+    for (let item of playlists.items) {
+      const videoIds: string[] = await getPlaylistVideoIds(item.id.playlistId);
+      if (videoIds.length < 60) {
+        continue;
+      }
+      const videos: VideoItem[] = await getVideos(videoIds);
+      if (videos.length >= 60) {
+        validPlaylists.push({...item, videos});
+      }
+      if (validPlaylists.length >= MAX_RESULTS) {
+        break;
+      }
+    }
+    console.log('validPlaylists: ', validPlaylists);
+    setIsLoading(false);
+    /**if (!playlistId) {
       setError(ERROR_TEXT.INVALID_URL);
       return;
     }
@@ -37,6 +56,7 @@ function App() {
     const videoPlayerItems: VideoPlayerItem[] = videos.map(videoItemToPlayerItem);
     setVideoPlayerItems(videoPlayerItems);
     setIsLoading(false);
+    **/
   }
 
   const getPlaylistIdFromUrl = (url: string) => {
@@ -114,34 +134,27 @@ function App() {
         className="hide-header-toggle"
       />
       <div className={`heading${hidden}`}>
-        <Header size="medium" className="title" textAlign="left">
-          <div>
-            <span>YouTube</span>
-            <span>Power</span>
-            <span>Hour</span>
-          </div>
-        </Header>
       <div 
         className="playlist-form"
       >
         <div className="form-header">
           <Label 
-            icon="arrow alternate circle down" 
+            icon="beer" 
             size="big" 
-            content="Enter YouTube playlist URL" 
+            content="YouTube Power Hour" 
           />
         </div>
         <Popup
           trigger={
             <Input type="text"
-              value={url}
-              onChange={e => setUrl(e.target.value)} 
+              value={query}
+              onChange={e => setQuery(e.target.value)} 
               action={{
                 color: 'teal',
                 labelPosition: 'right',
                 icon: 'youtube',
-                content: 'Generate Power Hour',
-                onClick: validateAndSetPlaylist
+                content: 'Search Power Hour(s)',
+                onClick: searchValidPlaylists
               }}
             />
           }

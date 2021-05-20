@@ -12,11 +12,24 @@ export async function getResource(endpoint: API_ENDPOINT, params: QUERY_PARAMS):
   return fetch(url);
 }
 
+export async function searchPlaylists(query: string) {
+  const params: SearchQueryParams = {
+    part: 'snippet',
+    type: 'playlist',
+    q: query,
+    maxResults: 50,
+    fields: 'items(id/playlistId,snippet(title,thumbnails/default))'
+  }
+  const response = await getResource(API_ENDPOINT.SEARCH, params);
+  return await response.json();
+}
+
 export async function getPlaylistVideoIds(playlistId: string) {
   const params: PlaylistItemQueryParams = {
     playlistId,
     part: 'contentDetails',
-    maxResults: 50
+    maxResults: 50,
+    fields: 'nextPageToken,items/contentDetails/videoId'
   }
   const videoIds: string[] = [];
   let response: Response;
@@ -31,7 +44,7 @@ export async function getPlaylistVideoIds(playlistId: string) {
     });
     pageToken = playlist.nextPageToken;
   }
-  return videoIds;
+  return shuffleArray(videoIds);
 }
 
 export function getDurationSeconds(isoDuration: string) {
@@ -53,6 +66,9 @@ export async function getVideos(ids: string[]): Promise<VideoItem[]> {
       .filter(item => !isContentRestricted(item) 
         && isUSAllowed(item)
         && (getDurationSeconds(item.contentDetails.duration) > 60)));
+    if (videos.length >= 60) {
+      return shuffleArray(videos);
+    }
   }
   return shuffleArray(videos);
 }
@@ -106,6 +122,7 @@ function shuffleArray(array: any[]): any[] {
 export interface CommonQueryParams {
   readonly part: string;
   readonly maxResults: number;
+  readonly fields?: string;
 }
 
 export interface SearchQueryParams extends CommonQueryParams {
@@ -149,6 +166,29 @@ export interface VideoPlayerItem {
 
 export interface VideosResponse {
   readonly items: VideoItem[];
+}
+
+export interface PlaylistSearchItems {
+  readonly items: PlaylistSearchItem[];
+}
+
+export interface PlaylistSearchItem {
+  readonly id: {
+    playlistId: string
+  };
+  readonly videos?: VideoItem[];
+  readonly snippet: {
+    readonly title: string;
+    readonly thumbnails: {
+      default: Thumbnail;
+    }
+  }
+}
+
+export interface Thumbnail {
+  readonly height: number;
+  readonly width: number;
+  readonly url: string;
 }
 
 export type QUERY_PARAMS = Partial<SearchQueryParams & PlaylistItemQueryParams>;
