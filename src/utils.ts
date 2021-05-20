@@ -25,9 +25,7 @@ export async function getPlaylistVideoIds(playlistId: string) {
   while (pageToken !== undefined) {
     response = await getResource(API_ENDPOINT.PLAYLIST_ITEMS, {
       ...params, pageToken});
-    console.log(response);
     playlist = await response.json();
-    console.log(playlist);
     playlist.items.forEach((item: PlaylistItem) => {
       videoIds.push(item.contentDetails.videoId);
     });
