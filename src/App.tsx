@@ -5,6 +5,7 @@ import { getPlaylistVideoIds, getVideos, PlaylistItemResponse, PlaylistSearchIte
 import { Button, Checkbox, Header, Icon, Input, Label, Loader, Message, Popup } from 'semantic-ui-react';
 import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
 import { ERROR_TEXT } from './constants';
+import { SearchResults } from './components/SearchResults';
 
 function App() {
   const MAX_RESULTS: number = 5;
@@ -41,22 +42,8 @@ function App() {
       }
     }
     console.log('validPlaylists: ', validPlaylists);
+    setValidPlaylists(validPlaylists);
     setIsLoading(false);
-    /**if (!playlistId) {
-      setError(ERROR_TEXT.INVALID_URL);
-      return;
-    }
-    setIsLoading(true);
-    const videoIds: string[] = await getPlaylistVideoIds(playlistId);
-    const videos: VideoItem[] = await getVideos(videoIds);
-    if (videos.length < 60) {
-      setError(ERROR_TEXT.INVALID_PLAYLIST);
-      return;
-    }
-    const videoPlayerItems: VideoPlayerItem[] = videos.map(videoItemToPlayerItem);
-    setVideoPlayerItems(videoPlayerItems);
-    setIsLoading(false);
-    **/
   }
 
   const getPlaylistIdFromUrl = (url: string) => {
@@ -144,21 +131,16 @@ function App() {
             content="YouTube Power Hour" 
           />
         </div>
-        <Popup
-          trigger={
-            <Input type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)} 
-              action={{
-                color: 'teal',
-                labelPosition: 'right',
-                icon: 'youtube',
-                content: 'Search Power Hour(s)',
-                onClick: searchValidPlaylists
-              }}
-            />
-          }
-          content="The playlist must contain at least 60 one-minute videos."
+        <Input type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)} 
+          action={{
+            color: 'teal',
+            labelPosition: 'right',
+            icon: 'youtube',
+            content: 'Search Power Hour(s)',
+            onClick: searchValidPlaylists
+          }}
         />
       </div>
       </div>
@@ -166,6 +148,7 @@ function App() {
       && (<div className="drink-text">
             <div>Drink!</div>
           </div>)}
+      <SearchResults results={validPlaylists} />
       {getVideoPlayer()}
     </div>
   );
