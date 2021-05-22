@@ -1,15 +1,23 @@
 .search-results {
     display: flex;
     flex-direction: column;
-    margin: 15px 15px 30px 15px;
+    margin: 0px 15px 15px 15px;
     overflow-y: scroll;
     font-size: 30px;
 }
 
 .search-result-header {
-    height: 40px;
-    padding: 5px 0px;
-    margin: 10px 0px
+    height: fit-content;
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: left;
+    padding: 15px;
+    background-color: #00b5ad;
+    opacity: 0.9;
+    color: white;
+    border-radius: 5px;
 }
 
 .search-result {
@@ -19,15 +27,30 @@
     align-items: flex-start;
     margin: 15px;
     justify-content: space-between;
-    border: 1px solid lightgrey;
-    padding: 10px;
     border-radius: 5px;
-    width: 400px;
+    width: 600px;
     transition: all .2s;
+    box-shadow: 4px 8px 20px 2px lightgrey;
+}
+
+.search-result-details {
+    display: flex;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 20px;
+    padding: 0px 15px 10px 15px;
+    margin-top: 10px;
+}
+
+.search-result-details span {
+    text-align: left;
+    padding: 10px;
+    line-height: 25px;
 }
 
 .search-result:hover {
     background-color: lightgrey;
+    opacity: 0.8;
 }
 
 .search-result img {
@@ -37,7 +60,7 @@
 .search-result .icon {
     opacity: 0; 
     position: absolute;
-    padding-top: 100px;
+    padding-top: 115px;
     z-index: 10000000;
     font-size: 100px;
     width: 100%;
@@ -47,6 +70,6 @@
 }
 
 .search-result .icon:hover {
-    opacity: 1 !important;
+    opacity: 0.8 !important;
     cursor: pointer;
 }

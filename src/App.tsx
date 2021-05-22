@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import YouTube from 'react-youtube';
 import './App.css';
-import { getPlaylistVideoIds, getVideos, PlaylistItemResponse, PlaylistSearchItem, PlaylistSearchItems, searchPlaylists, VideoItem, videoItemToPlayerItem, VideoPlayerItem } from './utils';
-import { Button, Checkbox, Header, Icon, Input, Label, Loader, Message, Popup } from 'semantic-ui-react';
-import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
-import { ERROR_TEXT } from './constants';
+import { getPlaylistVideoIds, getVideos, PlaylistSearchItem, PlaylistSearchItems, searchPlaylists, VideoItem, videoItemToPlayerItem, VideoPlayerItem } from './utils';
+import { Input, Label, Loader, Message} from 'semantic-ui-react';
+
 import { SearchResults } from './components/SearchResults';
 
 function App() {
@@ -25,6 +24,7 @@ function App() {
     setError('');
     setVideoIndex(0);
     setVideoPlayerItems([]);
+    setValidPlaylists([]);
     setIsLoading(true);
     const playlists: PlaylistSearchItems = await searchPlaylists(query);
     const validPlaylists: PlaylistSearchItem[] = [];
@@ -35,7 +35,7 @@ function App() {
       }
       const videos: VideoItem[] = await getVideos(videoIds);
       if (videos.length >= 60) {
-        validPlaylists.push({...item, videos});
+        validPlaylists.push({...item, videos: videos.map(videoItemToPlayerItem)});
       }
       if (validPlaylists.length >= MAX_RESULTS) {
         break;
@@ -96,16 +96,13 @@ function App() {
           onReady={onReady}
           onEnd={onPlayerStateChange}
           onError={onPlayerStateChange}
+          onPause={() => setHideHeader(false)}
+          onPlay={() => setHideHeader(true)}
           containerClassName="youtube-container"
           className={showDrinkText ? 'hidden' : ''}
           opts={{playerVars: {controls: 0, showinfo: 0, rel: 0, modestbranding: 1}, width: '100%', height: '100%'}}
         />
   }
-
-  const toggleHeader = () => {
-    setHideHeader(!hideHeader);
-  }
-
 
   return (
     <div className="App">
@@ -114,41 +111,36 @@ function App() {
         className="playlist-meta" 
         content={`Video ${videoIndex} / 60`} 
       />}
-      <Checkbox 
-        label="Show Header" 
-        toggle checked={!hideHeader} 
-        onClick={toggleHeader}
-        className="hide-header-toggle"
-      />
       <div className={`heading${hidden}`}>
-      <div 
-        className="playlist-form"
-      >
-        <div className="form-header">
-          <Label 
-            icon="beer" 
-            size="big" 
-            content="YouTube Power Hour" 
+        <div 
+          className="playlist-form"
+        >
+          <div className="form-header">
+            <Label 
+              icon="beer" 
+              size="big" 
+              content="YouTube Power Hour" 
+            />
+          </div>
+          <Input type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)} 
+            action={{
+              color: 'teal',
+              labelPosition: 'right',
+              icon: 'youtube',
+              content: 'Search Power Hour(s)',
+              onClick: searchValidPlaylists
+            }}
           />
         </div>
-        <Input type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)} 
-          action={{
-            color: 'teal',
-            labelPosition: 'right',
-            icon: 'youtube',
-            content: 'Search Power Hour(s)',
-            onClick: searchValidPlaylists
-          }}
-        />
-      </div>
       </div>
       {showDrinkText 
       && (<div className="drink-text">
             <div>Drink!</div>
           </div>)}
-      <SearchResults results={validPlaylists} />
+      {!videoPlayerItems.length 
+        && <SearchResults setPlaylist={setVideoPlayerItems} results={validPlaylists} />}
       {getVideoPlayer()}
     </div>
   );

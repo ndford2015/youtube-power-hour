@@ -3,10 +3,17 @@ import { Thumbnail } from "../utils";
 
 export function SearchResult(props: SearchResultProps) {
     return (
-        <div className="search-result">
+        <div onClick={props.onClick} className="search-result">
             <div className="search-result-header">{props.title}</div>
             <Icon name="play circle outline" />
-            <img src={props.thumbnail.url} height={props.thumbnail.height * 2} width={props.thumbnail.width * 2}/>
+            <div className="search-result-details">
+                <img 
+                    src={props.thumbnail.url} 
+                    height={props.thumbnail.height * 2} 
+                    width={props.thumbnail.width * 2}
+                />
+                <span>{props.description}</span>
+            </div>
         </div>
     )
 }
@@ -14,6 +21,8 @@ export function SearchResult(props: SearchResultProps) {
 export interface SearchResultProps {
     readonly title: string;
     readonly thumbnail: Thumbnail;
+    readonly description: string;
+    readonly onClick: () => void;
 }
 
 

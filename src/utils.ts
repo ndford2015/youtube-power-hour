@@ -18,7 +18,7 @@ export async function searchPlaylists(query: string) {
     type: 'playlist',
     q: query,
     maxResults: 50,
-    fields: 'items(id/playlistId,snippet(title,thumbnails/default))'
+    fields: 'items(id/playlistId,snippet(title,thumbnails/default, description))'
   }
   const response = await getResource(API_ENDPOINT.SEARCH, params);
   return await response.json();
@@ -176,9 +176,10 @@ export interface PlaylistSearchItem {
   readonly id: {
     playlistId: string
   };
-  readonly videos?: VideoItem[];
+  readonly videos?: VideoPlayerItem[];
   readonly snippet: {
     readonly title: string;
+    readonly description: string;
     readonly thumbnails: {
       default: Thumbnail;
     }
