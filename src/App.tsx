@@ -20,14 +20,14 @@ function App() {
   const hidden: string = hideHeader ? ' hidden' : ''
   
 
-  const searchValidPlaylists = async (evt:any) => {
+  const searchValidPlaylists = async (evt:any, suggestedQuery?: string) => {
     evt.preventDefault();
     setError('');
     setVideoIndex(0);
     setVideoPlayerItems([]);
     setValidPlaylists([]);
     setIsLoading(true);
-    const playlists: PlaylistSearchItems = await searchPlaylists(query);
+    const playlists: PlaylistSearchItems = await searchPlaylists(suggestedQuery ?? query);
     const validPlaylists: PlaylistSearchItem[] = [];
     for (let item of playlists.items) {
       const videoIds: string[] = await getPlaylistVideoIds(item.id.playlistId);
@@ -37,13 +37,13 @@ function App() {
       const videos: VideoItem[] = await getVideos(videoIds);
       if (videos.length >= 60) {
         validPlaylists.push({...item, videos: videos.map(videoItemToPlayerItem)});
+        setValidPlaylists(validPlaylists);
       }
       if (validPlaylists.length >= MAX_RESULTS) {
         break;
       }
     }
     console.log('validPlaylists: ', validPlaylists);
-    setValidPlaylists(validPlaylists);
     setIsLoading(false);
   }
 
@@ -84,11 +84,11 @@ function App() {
   }
 
   const searchSuggestion = (suggestion: string, evt: any) => {
-    setQuery(suggestion);
+    searchValidPlaylists(evt, suggestion);
   }
 
   const getSuggestions = () => {
-    if (videoPlayerItems.length || validPlaylists.length) {
+    if (videoPlayerItems.length || validPlaylists.length || isLoading) {
       return null;
     }
     return (
@@ -96,7 +96,14 @@ function App() {
         <span>Begin by searching for a Power Hour topic, or try one of the below!</span>
         <div>
           {suggestions.map(suggestion => {
-            return <Label as="a" content={suggestion} onClick={(evt) => searchSuggestion(suggestion, evt)} />
+            return (
+              <Label 
+                as="a" 
+                size="huge"
+                content={suggestion} 
+                onClick={(evt) => searchSuggestion(suggestion, evt)} 
+              />
+            )
           })}
         </div>
       </div>
