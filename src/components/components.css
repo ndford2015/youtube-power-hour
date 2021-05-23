@@ -20,6 +20,14 @@
     border-radius: 5px;
 }
 
+.suggestions-container {
+    margin: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 60px
+}
+
 .search-result {
     display: flex;
     flex-direction: column;

@@ -5,3 +5,12 @@ export enum ERROR_TEXT {
     INVALID_URL = "The url you entered doesn't seem to be a valid YouTube playlist.",
     INVALID_PLAYLIST = "This playlist doesn't have at least 60 one-minute videos."
 }
+
+export const suggestions = [
+    "Best of Seinfeld",
+    "Hip Hop music videos",
+    "Nature Documentaries",
+    "NBA highlights",
+    "Fail compilation",
+    "Best movie scenes"
+]

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import YouTube from 'react-youtube';
 import './App.css';
 import { getPlaylistVideoIds, getVideos, PlaylistSearchItem, PlaylistSearchItems, searchPlaylists, VideoItem, videoItemToPlayerItem, VideoPlayerItem } from './utils';
-import { Input, Label, Loader, Message} from 'semantic-ui-react';
+import { Icon, Input, Label, Loader, Message} from 'semantic-ui-react';
 
 import { SearchResults } from './components/SearchResults';
+import { suggestions } from './constants';
 
 function App() {
   const MAX_RESULTS: number = 5;
@@ -82,6 +83,25 @@ function App() {
     }
   }
 
+  const searchSuggestion = (suggestion: string, evt: any) => {
+    setQuery(suggestion);
+  }
+
+  const getSuggestions = () => {
+    if (videoPlayerItems.length || validPlaylists.length) {
+      return null;
+    }
+    return (
+      <div className="suggestions-container">
+        <span>Begin by searching for a Power Hour topic, or try one of the below!</span>
+        <div>
+          {suggestions.map(suggestion => {
+            return <Label as="a" content={suggestion} onClick={(evt) => searchSuggestion(suggestion, evt)} />
+          })}
+        </div>
+      </div>
+    )
+  }
 
   const getVideoPlayer = (): JSX.Element | null => {
     if (error) {
@@ -92,25 +112,37 @@ function App() {
     }
     return videoPlayerItems.length === 0
       ? null
-      : <YouTube 
-          onReady={onReady}
-          onEnd={onPlayerStateChange}
-          onError={onPlayerStateChange}
-          onPause={() => setHideHeader(false)}
-          onPlay={() => setHideHeader(true)}
-          containerClassName="youtube-container"
-          className={showDrinkText ? 'hidden' : ''}
-          opts={{playerVars: {controls: 0, showinfo: 0, rel: 0, modestbranding: 1}, width: '100%', height: '100%'}}
-        />
+      : (<div className="video-container">
+          <Icon 
+            onClick={exitPlayer}
+            className="exit-player" 
+            name="window close outline"
+          />
+          <YouTube 
+            onReady={onReady}
+            onEnd={onPlayerStateChange}
+            onError={onPlayerStateChange}
+            onPause={() => setHideHeader(false)}
+            onPlay={() => setHideHeader(true)}
+            containerClassName="youtube-container"
+            className={showDrinkText ? 'hidden' : ''}
+            opts={{playerVars: {controls: 0, showinfo: 0, rel: 0}, width: '100%', height: '100%'}}
+          />
+          <Label 
+            className="playlist-meta" 
+            content={`Video ${videoIndex} / 60`} 
+          />
+        </div>)
+  }
+
+  const exitPlayer = () => {
+    setVideoIndex(0);
+    setVideoPlayerItems([]);
+    setHideHeader(false);
   }
 
   return (
     <div className="App">
-      {videoIndex > 0 && 
-      <Label 
-        className="playlist-meta" 
-        content={`Video ${videoIndex} / 60`} 
-      />}
       <div className={`heading${hidden}`}>
         <div 
           className="playlist-form"
@@ -135,6 +167,7 @@ function App() {
           />
         </div>
       </div>
+      {getSuggestions()}
       {showDrinkText 
       && (<div className="drink-text">
             <div>Drink!</div>
